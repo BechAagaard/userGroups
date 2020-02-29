@@ -1,9 +1,7 @@
 ﻿## NOTE
-# Hvis ikke man har sat settings før, så tag en a dgangen
-# for, at kunne reverte til tidligere, så systemer ikke
-# påvirkes.
 #
-# Please only run line at the time, to make sure you can revert if the settings from orca dosnt "fit" you" :-)
+#
+# Please only run one line at the time, to make sure you can revert if the settings from orca dosnt "fit" you" :-)
 #
 ##
 
