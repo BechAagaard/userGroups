@@ -3,11 +3,12 @@
 # for, at kunne reverte til tidligere, så systemer ikke
 # påvirkes.
 #
+# Please only run line at the time, to make sure you can revert if the settings from orca dosnt "fit" you" :-)
 #
 ##
 
 #Import ExchangeOnline 
-# // hent Exo modulet fra admin.microsoft.com -> Exchange -> Hybrid
+# //if you do not have the exo modern auth module download it from admin.microsoft.com -> Exchange -> Hybrid
 Import-Module $((Get-ChildItem -Path $($env:LOCALAPPDATA+"\Apps\2.0\") -Filter Microsoft.Exchange.Management.ExoPowershellModule.dll -Recurse ).FullName|?{$_ -notmatch "_none_"}|select -First 1)
 $EXOSession = New-ExoPSSession
 Import-PSSession $EXOSession
@@ -18,7 +19,7 @@ Install-Module ORCA
 #Run ORCA
 Get-ORCAReport
 
-#Hent ExchangeObjectID pr Set
+#Go Fetch all the Object Id needed, if your are running with more or custom, you will need to fit the script
 $HostedContentFilterPolicyID = (Get-HostedContentFilterPolicy).ExchangeObjectID
 $HostedOutboundSpamFilterPolicyID = (Get-HostedOutboundSpamFilterPolicy).ExchangeObjectID
 $MalwareFilterPolicyID = (Get-MalwareFilterPolicy).ExchangeObjectID
@@ -26,36 +27,36 @@ $AntiPhishPolicyID = (Get-AntiPhishPolicy).ExchangeObjectId
 
 
 
-#  Ændret fra 7 til 6
+#  Change from 7 to 6
 Set-HostedContentFilterPolicy -Identity $HostedContentFilterPolicyID.Guid -BulkThreshold 6 
 
-# Sæt RecipientLimitExternalPerHour (https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/recommended-settings-for-eop-and-office365-atp#anti-spam-anti-malware-and-anti-phishing-protection-in-eop)
+# Set RecipientLimitExternalPerHour (https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/recommended-settings-for-eop-and-office365-atp#anti-spam-anti-malware-and-anti-phishing-protection-in-eop)
 Set-HostedOutboundSpamFilterPolicy -Identity $HostedOutboundSpamFilterPolicyID.Guid -RecipientLimitExternalPerHour 500
 
-# Sæt RecipientLimitInternalPerHour 
+# Set RecipientLimitInternalPerHour 
 Set-HostedOutboundSpamFilterPolicy -Identity $HostedOutboundSpamFilterPolicyID.Guid -RecipientLimitInternalPerHour 1000
 
-# Sæt RecipientLimitPerDay 
+# Set RecipientLimitPerDay 
 Set-HostedOutboundSpamFilterPolicy -Identity $HostedOutboundSpamFilterPolicyID.Guid -RecipientLimitPerDay 1000
 
-# Sæt ActionWhenThresholdReached
+# Set ActionWhenThresholdReached
 Set-HostedOutboundSpamFilterPolicy -Identity $HostedOutboundSpamFilterPolicyID.Guid -ActionWhenThresholdReached BlockUser
 
 
-# Sæt Confidence SPAM til Quarantine (fra MoveToJmF)
+# Set Confidence SPAM to Quarantine (from MoveToJmF)
 Set-HostedContentFilterPolicy -Identity $HostedContentFilterPolicyID.Guid -HighConfidenceSpamAction Quarantine
 
-# Sæt BulkSpamAction til MoveToJMF (to Quarantine)
+# Set BulkSpamAction to MoveToJMF (from Quarantine)
 Set-HostedContentFilterPolicy -Identity $HostedContentFilterPolicyID.Guid -BulkSpamAction MovetoJMF
 
 # Sæt Phish Action to Quarantine message (from MoveToJmF)
 Set-HostedContentFilterPolicy -Identity $HostedContentFilterPolicyID.Guid -PhishSpamAction Quarantine
 
-#Sæt DKIM op :-)
-#sjov ting ifbm MFA -)
+#Setup DKIM :-)
+#Import the module for dkim
 Get-Command -Module tmp_dmwhjqj3.m1c *dkim*
-# New-DkimSigningConfig -DomainName win74ever.dk -Enabled $true
-Set-DkimSigningConfig -Identity win74ever.dk -Enabled $true
+# New-DkimSigningConfig -DomainName "DomainNameHere" -Enabled $true
+Set-DkimSigningConfig -Identity "domainname here" -Enabled $true
 
 # Unified Audit Log (Security & Compliance Center, go to Search > Audit log search)
 Set-AdminAuditLogConfig -UnifiedAuditLogIngestionEnabled $true
